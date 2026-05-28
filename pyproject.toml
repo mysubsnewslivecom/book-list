@@ -1,0 +1,56 @@
+[project]
+name = "book-list"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "alembic>=1.18.4",
+    "fastapi[standard-no-fastapi-cloud-cli]>=0.136.3",
+    "jinja2>=3.1.6",
+]
+[dependency-groups]
+dev = [
+  {include-group = "lint"},
+  {include-group = "test"}
+]
+lint = [
+    "pylint>=4.0.5",
+    "ruff>=0.15.15",
+]
+test = [
+    "pytest>=9.0.3",
+    "pytest-cov>=7.1.0",
+]
+
+[project.scripts]
+start = "src.main:run"
+
+[tool.uv]
+package = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+exclude = ["tests/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]
+
+[tool.pylint.main]
+ignore = [".venv", "venv", ".env", "build", "dist", "__pycache__"]
+
+[tool.pylint.messages_control]
+max-line-length = 120
+disable = [
+  "missing-module-docstring",
+  "missing-class-docstring",
+  "missing-function-docstring",
+  "too-few-public-methods",
+  "duplicate-code",
+]

@@ -1,0 +1,45 @@
+{
+  "name": "book-list",
+  // "build": {
+  //   "dockerfile": "Dockerfile",
+  //   "args": {
+  //     "BUILD_IMAGE_NAME": "docker.io/python",
+  //     "BUILD_IMAGE_TAG": "3.12.7-slim-bookworm"
+  //   },
+  //   "context": ".."
+  // },
+  "image": "mysubsnews/devc-python:3.14.4-slim-bookworm",
+  "runArgs": [
+    "--name=book-list",
+    "--hostname=book-list",
+    "--env-file=.env",
+    "--network=alpine-net"
+  ],
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "yzhang.markdown-all-in-one",
+        "DavidAnson.vscode-markdownlint",
+        "EditorConfig.EditorConfig",
+        "redhat.vscode-yaml",
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "ms-python.pylint"
+      ],
+      "settings": {
+        "terminal.integrated.profiles.devuser": {
+          "bash": {
+            "path": "/usr/bin/bash",
+            "icon": "terminal-bash"
+          }
+        }
+      }
+    }
+  },
+  "initializeCommand": "test -f .env || touch .env",
+  "mounts": [
+    "source=${localEnv:HOME}/.ssh,target=/home/devuser/.ssh,type=bind,consistency=cached",
+  ]
+  // "postStartCommand": "bash -c '[[ -f .devcontainer/post_create_commands.sh ]] && bash .devcontainer/post_create_commands.sh setup'"
+}
