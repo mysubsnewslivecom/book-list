@@ -48,7 +48,7 @@ app = FastAPI(
 )
 
 # Register routers
-app.include_router(books_router)
+app.include_router(books_router, prefix="/api/v1")
 
 # Serve static files
 static_dir = Path(__file__).parent / "static"
