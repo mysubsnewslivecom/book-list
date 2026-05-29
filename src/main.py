@@ -1,9 +1,11 @@
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 import uvicorn
 from fastapi import FastAPI
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from api import books_router
 from db.database import Base, engine
@@ -48,13 +50,20 @@ app = FastAPI(
 # Register routers
 app.include_router(books_router)
 
+# Serve static files
+static_dir = Path(__file__).parent / "static"
+if static_dir.exists():
+    app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
-@app.get("/", tags=["Home"])
+
+# Root route - serve the HTML dashboard
+@app.get("/", include_in_schema=False)
 async def root():
-    """
-    Redirect to Swagger docs.
-    """
-    return RedirectResponse(url="/docs")
+    """Serve the API documentation dashboard"""
+    html_file = Path(__file__).parent / "static" / "index.html"
+    if html_file.exists():
+        return FileResponse(html_file)
+    return {"message": "Welcome to Book Library API"}
 
 
 @app.get("/health", tags=["Health"])
