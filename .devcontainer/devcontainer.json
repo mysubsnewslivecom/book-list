@@ -13,7 +13,7 @@
     "--name=book-list",
     "--hostname=book-list",
     "--env-file=.env",
-    "--network=alpine-net"
+    "--network=proxy-nw"
   ],
   "customizations": {
     "vscode": {
