@@ -98,22 +98,37 @@
       padding: 32px 20px;
     }
 
-    /* MODAL ZONE — sits inline at top, hidden by default */
-    .modal-zone {
+    /* ── POPUP MODAL ──
+       The overlay is a normal in-flow div that stretches to cover the page.
+       It sits at the top of .wrap and uses a negative margin trick to span
+       the full page height without using position:fixed.
+    */
+    .modal-overlay {
       display: none;
-      margin-bottom: 24px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(26, 26, 46, 0.82);
+      z-index: 50;
+      align-items: flex-start;
+      justify-content: center;
+      padding-top: 80px;
     }
 
-    .modal-zone.open {
-      display: block;
+    .modal-overlay.open {
+      display: flex;
     }
 
     .modal-box {
       background: var(--plastic);
       border: 4px solid var(--ink);
       box-shadow: 6px 6px 0 var(--ink);
-      max-width: 480px;
-      margin: 0 auto;
+      width: 100%;
+      max-width: 460px;
+      position: relative;
+      z-index: 51;
     }
 
     .modal-head {
@@ -270,7 +285,7 @@
       box-shadow: none;
     }
 
-    /* HEADER */
+    /* PAGE CONTENT */
     .header {
       background: var(--ink);
       border: 4px solid var(--ink);
@@ -294,7 +309,6 @@
       letter-spacing: 2px;
     }
 
-    /* STATS */
     .stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
@@ -324,7 +338,6 @@
       letter-spacing: 1px;
     }
 
-    /* COLUMNS */
     .cols {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -409,7 +422,6 @@
       background: var(--ink);
     }
 
-    /* BOOK CARD */
     .book {
       background: #fff;
       border: 3px solid var(--ink);
@@ -508,7 +520,6 @@
       box-shadow: 2px 2px 0 var(--red-dk);
     }
 
-    /* EMPTY */
     .empty {
       text-align: center;
       padding: 32px 12px;
@@ -517,7 +528,6 @@
       line-height: 2.2;
     }
 
-    /* TOAST */
     .toast {
       position: fixed;
       bottom: 20px;
@@ -572,14 +582,15 @@
     <button class="btn-nav" onclick="openAdd()">+ ADD BOOK</button>
   </nav>
 
-  <div class="wrap">
+  <!-- Page wrapper — position:relative so absolute overlays are scoped to it -->
+  <div id="page" style="position:relative;">
 
-    <!-- BOOK MODAL (inline) -->
-    <div class="modal-zone" id="bookModal">
+    <!-- BOOK MODAL OVERLAY -->
+    <div class="modal-overlay" id="bookOverlay" onclick="overlayClick(event,'bookOverlay')">
       <div class="modal-box">
         <div class="modal-head">
           <h3 id="modalTitle">ADD NEW BOOK</h3>
-          <button class="modal-close" onclick="closeBookModal()">X</button>
+          <button class="modal-close" onclick="closeBook()">X</button>
         </div>
         <div class="modal-body">
           <div class="field"><label>TITLE *</label><input type="text" id="bookTitle" placeholder="Enter title..."></div>
@@ -596,70 +607,93 @@
           </div>
         </div>
         <div class="modal-foot">
-          <button class="btn-cancel" onclick="closeBookModal()">CANCEL</button>
+          <button class="btn-cancel" onclick="closeBook()">CANCEL</button>
           <button class="btn-save" onclick="saveBook()">SAVE</button>
         </div>
       </div>
     </div>
 
-    <!-- DELETE MODAL (inline) -->
-    <div class="modal-zone" id="delModal">
+    <!-- DELETE MODAL OVERLAY -->
+    <div class="modal-overlay" id="delOverlay" onclick="overlayClick(event,'delOverlay')">
       <div class="modal-box">
         <div class="modal-head">
           <h3>DELETE BOOK?</h3>
-          <button class="modal-close" onclick="closeDelModal()">X</button>
+          <button class="modal-close" onclick="closeDel()">X</button>
         </div>
         <div class="modal-body">
-          <p style="font-size:0.48rem;line-height:2.2;color:var(--ink);">REMOVE THIS BOOK?<br>THIS CANNOT BE UNDONE.</p>
+          <p style="font-size:0.48rem;line-height:2.4;color:var(--ink);">REMOVE THIS BOOK?<br>THIS CANNOT BE UNDONE.</p>
         </div>
         <div class="modal-foot">
-          <button class="btn-cancel" onclick="closeDelModal()">CANCEL</button>
+          <button class="btn-cancel" onclick="closeDel()">CANCEL</button>
           <button class="btn-del-confirm" onclick="confirmDelete()">DELETE</button>
         </div>
       </div>
     </div>
 
-    <div class="header">
-      <h1>* MY READING COLLECTION *</h1>
-      <p>TRACK YOUR READING JOURNEY</p>
+    <div class="wrap">
+      <div class="header">
+        <h1>* MY READING COLLECTION *</h1>
+        <p>TRACK YOUR READING JOURNEY</p>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><span class="stat-num" id="s-total">0</span><span class="stat-lbl">TOTAL</span></div>
+        <div class="stat"><span class="stat-num" id="s-reading">0</span><span class="stat-lbl">READING</span></div>
+        <div class="stat"><span class="stat-num" id="s-done">0</span><span class="stat-lbl">DONE</span></div>
+        <div class="stat"><span class="stat-num" id="s-queue">0</span><span class="stat-lbl">QUEUE</span></div>
+      </div>
+
+      <div class="cols">
+        <div class="col col-pending">
+          <div class="col-head">
+            <h2>TO READ</h2><span class="badge" id="c-pending">0</span>
+          </div>
+          <div class="col-body" id="pending-books"></div>
+        </div>
+        <div class="col col-reading">
+          <div class="col-head">
+            <h2>READING</h2><span class="badge" id="c-reading">0</span>
+          </div>
+          <div class="col-body" id="reading-books"></div>
+        </div>
+        <div class="col col-read">
+          <div class="col-head">
+            <h2>COMPLETED</h2><span class="badge" id="c-read">0</span>
+          </div>
+          <div class="col-body" id="read-books"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="stats">
-      <div class="stat"><span class="stat-num" id="s-total">0</span><span class="stat-lbl">TOTAL</span></div>
-      <div class="stat"><span class="stat-num" id="s-reading">0</span><span class="stat-lbl">READING</span></div>
-      <div class="stat"><span class="stat-num" id="s-done">0</span><span class="stat-lbl">DONE</span></div>
-      <div class="stat"><span class="stat-num" id="s-queue">0</span><span class="stat-lbl">QUEUE</span></div>
-    </div>
-
-    <div class="cols">
-      <div class="col col-pending">
-        <div class="col-head">
-          <h2>TO READ</h2><span class="badge" id="c-pending">0</span>
-        </div>
-        <div class="col-body" id="pending-books"></div>
-      </div>
-      <div class="col col-reading">
-        <div class="col-head">
-          <h2>READING</h2><span class="badge" id="c-reading">0</span>
-        </div>
-        <div class="col-body" id="reading-books"></div>
-      </div>
-      <div class="col col-read">
-        <div class="col-head">
-          <h2>COMPLETED</h2><span class="badge" id="c-read">0</span>
-        </div>
-        <div class="col-body" id="read-books"></div>
-      </div>
-    </div>
-
-  </div>
+  </div><!-- end #page -->
 
   <script>
     const API = '/api/v1';
     let books = [], editId = null, delId = null;
 
-    function scrollToModal(id) {
-      document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    function syncOverlayHeight() {
+      const page = document.getElementById('page');
+      const h = Math.max(page.scrollHeight, window.innerHeight || 600);
+      ['bookOverlay', 'delOverlay'].forEach(id => {
+        const el = document.getElementById(id);
+        el.style.minHeight = h + 'px';
+      });
+    }
+
+    function openBook() {
+      syncOverlayHeight();
+      document.getElementById('delOverlay').classList.remove('open');
+      document.getElementById('bookOverlay').classList.add('open');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function closeBook() { document.getElementById('bookOverlay').classList.remove('open'); }
+    function closeDel() { document.getElementById('delOverlay').classList.remove('open'); }
+
+    function overlayClick(e, id) {
+      if (e.target === document.getElementById(id)) {
+        document.getElementById(id).classList.remove('open');
+      }
     }
 
     function openAdd() {
@@ -669,9 +703,7 @@
       document.getElementById('bookAuthor').value = '';
       document.getElementById('bookDescription').value = '';
       document.getElementById('bookStatus').value = 'pending';
-      document.getElementById('delModal').classList.remove('open');
-      document.getElementById('bookModal').classList.add('open');
-      scrollToModal('bookModal');
+      openBook();
     }
 
     function openEdit(id) {
@@ -682,13 +714,25 @@
       document.getElementById('bookAuthor').value = b.author;
       document.getElementById('bookDescription').value = b.description || '';
       document.getElementById('bookStatus').value = b.status;
-      document.getElementById('delModal').classList.remove('open');
-      document.getElementById('bookModal').classList.add('open');
-      scrollToModal('bookModal');
+      openBook();
     }
 
-    function closeBookModal() { document.getElementById('bookModal').classList.remove('open'); }
-    function closeDelModal() { document.getElementById('delModal').classList.remove('open'); }
+    function askDel(id) {
+      delId = id;
+      syncOverlayHeight();
+      document.getElementById('bookOverlay').classList.remove('open');
+      document.getElementById('delOverlay').classList.add('open');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    async function confirmDelete() {
+      if (!delId) return;
+      closeDel();
+      try {
+        await fetch(`${API}/books/${delId}`, { method: 'DELETE' });
+        delId = null; load(); toast('BOOK DELETED!');
+      } catch { toast('ERROR DELETING', true); }
+    }
 
     async function load() {
       try {
@@ -745,7 +789,7 @@
           ? await fetch(`${API}/books/${editId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
           : await fetch(`${API}/books/`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
         if (!r.ok) throw new Error();
-        closeBookModal();
+        closeBook();
         toast(editId ? 'BOOK UPDATED!' : 'BOOK ADDED!');
         load();
       } catch { toast('ERROR SAVING', true); }
@@ -756,22 +800,6 @@
         await fetch(`${API}/books/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: s }) });
         load(); toast('STATUS UPDATED!');
       } catch { toast('ERROR', true); }
-    }
-
-    function askDel(id) {
-      delId = id;
-      document.getElementById('bookModal').classList.remove('open');
-      document.getElementById('delModal').classList.add('open');
-      scrollToModal('delModal');
-    }
-
-    async function confirmDelete() {
-      if (!delId) return;
-      closeDelModal();
-      try {
-        await fetch(`${API}/books/${delId}`, { method: 'DELETE' });
-        delId = null; load(); toast('BOOK DELETED!');
-      } catch { toast('ERROR DELETING', true); }
     }
 
     function toast(msg, err) {
