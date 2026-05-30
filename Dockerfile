@@ -23,13 +23,13 @@ RUN uv sync --frozen --no-dev && rm -rvf *.egg-info uv.lock pyproject.toml
 COPY --chown=appuser:appuser . .
 
 # ---------- Runtime ----------
-FROM python:3.14-slim
+FROM python:3.14.5-slim
+
+RUN useradd -m appuser
 
 ENV VIRTUAL_ENV=/app/.venv \
     PATH="/app/.venv/bin:$PATH" \
     PYTHONPATH=/app/src
-
-RUN useradd -m appuser
 
 WORKDIR /app
 

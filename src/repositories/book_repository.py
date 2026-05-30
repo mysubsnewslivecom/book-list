@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from db.models.books import Book
@@ -33,3 +34,7 @@ class BookRepository:
 
     def get_by_status(self, status: str):
         return self.db.query(Book).filter(Book.status == status).all()
+
+    def get_selected(self):
+        stmt = select(Book.title, Book.author, Book.status)
+        return self.db.execute(stmt).all()

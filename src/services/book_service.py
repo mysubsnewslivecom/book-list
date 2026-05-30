@@ -42,3 +42,6 @@ class BookService:
 
     def get_book_by_status(self, status: str):
         return self.repo.get_by_status(status=status)
+
+    def get_selected(self):
+        return self.repo.get_selected()

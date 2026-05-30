@@ -30,12 +30,10 @@ def group_books_by_status(books):
     grouped = defaultdict(list)
 
     for book in books:
-        grouped[book.status].append({
-            "title": book.title,
-            "author": book.author
-        })
+        grouped[book.status].append({"title": book.title, "author": book.author})
 
     return dict(grouped)
+
 
 # ---------------------------------------------------------------------
 # Endpoints
@@ -172,16 +170,16 @@ class ByStatus(BaseModel):
     description="Retrieve books filtered by reading status.",
     operation_id="getBooksByStatus",
 )
-async def get_books_by_status(
-    service: BookServiceDep
-):
+async def get_books_by_status(service: BookServiceDep):
     books = service.list_books()
-
 
     if not books:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No books found",
         )
+
+    rows = service.get_selected()
+    logger.info(group_books_by_status(rows))
 
     return group_books_by_status(books=books)
