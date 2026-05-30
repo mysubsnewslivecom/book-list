@@ -39,3 +39,6 @@ class BookService:
         self.repo.db.refresh(book)
 
         return book
+
+    def get_book_by_status(self, status: str):
+        return self.repo.get_by_status(status=status)

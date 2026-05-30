@@ -30,3 +30,6 @@ class BookRepository:
         self.db.commit()
         self.db.refresh(book)
         return book
+
+    def get_by_status(self, status: str):
+        return self.db.query(Book).filter(Book.status == status).all()
