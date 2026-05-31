@@ -4,8 +4,8 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from db.database import Base
-from utils.config import settings
 from db.models import books  # noqa: F401 - Ensure models are imported for Alembic autogenerate support
+from utils.config import settings
 
 # Alembic Config object
 config = context.config

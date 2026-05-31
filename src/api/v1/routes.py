@@ -49,13 +49,13 @@ def group_books_by_status(books):
 )
 async def get_books(
     service: BookServiceDep,
-    status: str | None = Query(
+    book_status: str | None = Query(
         default=None,
         description="Filter books by status (e.g. reading, finished, planned)",
     ),
 ):
-    if status:
-        return service.get_book_by_status(status=status)
+    if book_status:
+        return service.get_book_by_status(book_status)
     return service.list_books()
 
 

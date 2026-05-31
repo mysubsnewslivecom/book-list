@@ -1,12 +1,14 @@
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.database import Base
 
 
 class Book(Base):
     __tablename__ = "books"
+    __table_args__ = {"schema": "books"}
 
     id = Column(Integer, primary_key=True, index=True)
 
@@ -42,5 +44,59 @@ class Book(Base):
         index=True,
     )
 
+    reading_sessions: Mapped[list[ReadingSession]] = relationship(
+        back_populates="book",
+        cascade="all, delete-orphan",
+    )
+
     def __repr__(self) -> str:
         return f"<Book(id={self.id}, title='{self.title}', author='{self.author}', status='{self.status}')>"
+
+
+class ReadingSession(Base):
+    __tablename__ = "reading_sessions"
+    __table_args__ = {"schema": "books"}
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        autoincrement=True,
+    )
+
+    book_id: Mapped[int] = mapped_column(
+        ForeignKey("books.books.id"),
+        nullable=False,
+    )
+
+    session_date: Mapped[date] = mapped_column(
+        Date,
+        nullable=False,
+    )
+
+    minutes_read: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+    )
+
+    pages_read: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )
+
+    notes: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    book = relationship("Book", back_populates="reading_sessions")
+
+    def __repr__(self) -> str:
+        return (
+            f"ReadingSession("
+            f"id={self.id!r}, "
+            f"book_id={self.book_id!r}, "
+            f"session_date={self.session_date!r}, "
+            f"minutes_read={self.minutes_read!r}, "
+            f"pages_read={self.pages_read!r}"
+            f")"
+        )

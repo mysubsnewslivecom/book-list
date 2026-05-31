@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from api import books_router
+from api import books_router, reading_session_router
 from db.database import Base, engine
 
 # Configure logging
@@ -22,7 +22,7 @@ logger = logging.getLogger("uvicorn.error")
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     """
     Application startup/shutdown lifecycle.
     """
@@ -49,6 +49,7 @@ app = FastAPI(
 
 # Register routers
 app.include_router(books_router, prefix="/api/v1")
+app.include_router(reading_session_router, prefix="/api/v1")
 
 # Serve static files
 static_dir = Path(__file__).parent / "static"
@@ -83,7 +84,7 @@ def run():
     """
 
     uvicorn.run(
-        "src.main:app",
+        "main:app",
         host="0.0.0.0",
         port=8000,
         reload=True,
