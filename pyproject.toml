@@ -26,7 +26,7 @@ test = [
 ]
 
 [project.scripts]
-start = "src.main:run"
+start = "main:run"
 
 [tool.uv]
 package = true
@@ -73,4 +73,12 @@ shell = """
     uv run ruff check src --fix || true
     echo "Running ruff format"
     uv run ruff format src || true
+"""
+
+[tool.poe.tasks.migrate]
+shell = """
+dotenv run alembic check > /dev/null 2>&1 || (
+    dotenv run alembic revision --autogenerate -m "auto migration" \
+    && dotenv run alembic upgrade head
+)
 """

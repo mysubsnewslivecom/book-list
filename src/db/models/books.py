@@ -1,9 +1,16 @@
+import enum
 from datetime import UTC, date, datetime
 
-from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, Date, DateTime, Enum, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.database import Base
+
+
+class Status(enum.StrEnum):
+    READ = "read"
+    PENDING = "pending"
+    READING = "reading"
 
 
 class Book(Base):
@@ -30,11 +37,8 @@ class Book(Base):
         nullable=True,
     )
 
-    status = Column(
-        String,
-        nullable=False,
-        default="available",
-        index=True,
+    status: Mapped[Status] = mapped_column(
+        Enum(Status, name="status"), nullable=False, default=Status.PENDING, index=True
     )
 
     created_at = Column(
