@@ -13,7 +13,8 @@ dependencies = [
 [dependency-groups]
 dev = [
   {include-group = "lint"},
-  {include-group = "test"}
+  {include-group = "test"},
+  "poethepoet>=0.46.0",
 ]
 lint = [
     "pylint>=4.0.5",
@@ -33,6 +34,9 @@ package = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-ra -q"
+
+[tool.isort]
+line_length = 120
 
 [tool.ruff]
 line-length = 120
@@ -55,3 +59,18 @@ disable = [
   "too-few-public-methods",
   "duplicate-code",
 ]
+
+[tool.poe]
+verbosity = -1
+
+[tool.poe.tasks.lint]
+shell = """
+    echo "Running pylint"
+    uv run pylint src || true
+    echo "Running isort"
+    uv run isort src || true
+    echo "Running ruff check"
+    uv run ruff check src --fix || true
+    echo "Running ruff format"
+    uv run ruff format src || true
+"""

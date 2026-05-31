@@ -1,6 +1,6 @@
 # ---- Base image ----
 ARG BUILD_IMAGE_NAME=docker.io/python
-ARG BUILD_IMAGE_TAG=3.14.4-slim-bookworm
+ARG BUILD_IMAGE_TAG=3.14.5-slim-trixie
 FROM ${BUILD_IMAGE_NAME}:${BUILD_IMAGE_TAG}
 
 # ---- Copy uv (fast Python package manager) ----
@@ -39,7 +39,9 @@ RUN apt-get update \
   && update-ca-certificates \
   && apt-get autoremove -yqq --purge \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* \
+  && echo "en_US.UTF-8 UTF-8" | tee /etc/locale.gen \
+  && locale-gen
 
 ENV LANG=en_US.UTF-8
 

@@ -8,13 +8,19 @@
   //   },
   //   "context": ".."
   // },
-  "image": "mysubsnews/devc-python:3.14.4-slim-bookworm",
+  "image": "docker.io/mysubsnews/devc-python:3.14.5-slim-trixie",
   "runArgs": [
     "--name=book-list",
     "--hostname=book-list",
     "--env-file=.env",
     "--network=proxy-nw"
   ],
+  "containerEnv": {
+    "PYTHONPATH": "${containerWorkspaceFolder}/src"
+  },
+  "remoteEnv": {
+      "PYTHONPATH": "${containerEnv:PYTHONPATH}"
+  },
   "customizations": {
     "vscode": {
       "extensions": [
