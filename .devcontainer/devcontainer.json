@@ -46,6 +46,6 @@
   "initializeCommand": "test -f .env || touch .env",
   "mounts": [
     "source=${localEnv:HOME}/.ssh,target=/home/devuser/.ssh,type=bind,consistency=cached",
-  ]
-  // "postStartCommand": "bash -c '[[ -f .devcontainer/post_create_commands.sh ]] && bash .devcontainer/post_create_commands.sh setup'"
+  ],
+  "postStartCommand": "bash -c '[[ -f .devcontainer/post_create_commands.py ]] && .devcontainer/post_create_commands.py'"
 }
