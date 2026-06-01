@@ -7,7 +7,14 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
-from api import books_router, reading_session_router
+from api import (
+    anime_router,
+    books_router,
+    dashboard_router,
+    reading_session_router,
+    seasons_router,
+    watch_entries_router,
+)
 from db.database import Base, engine
 
 # Configure logging
@@ -50,6 +57,10 @@ app = FastAPI(
 # Register routers
 app.include_router(books_router, prefix="/api/v1")
 app.include_router(reading_session_router, prefix="/api/v1")
+app.include_router(anime_router, prefix="/api/v1")
+app.include_router(dashboard_router, prefix="/api/v1")
+app.include_router(seasons_router, prefix="/api/v1")
+app.include_router(watch_entries_router, prefix="/api/v1")
 
 # Serve static files
 static_dir = Path(__file__).parent / "static"
