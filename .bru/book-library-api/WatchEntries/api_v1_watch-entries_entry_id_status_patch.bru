@@ -1,0 +1,16 @@
+meta {
+  name: Update Status
+  type: http
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/watch-entries/{{entry_id}}/status
+}
+
+
+
+body:json {
+{
+  "example": "#/components/schemas/WatchEntryStatusUpdate"
+}
+}

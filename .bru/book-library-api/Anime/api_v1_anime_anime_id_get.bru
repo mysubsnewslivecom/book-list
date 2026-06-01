@@ -1,0 +1,15 @@
+meta {
+  name: Get Anime By Id
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/v1/anime/{{anime_id}}
+  body: none
+  auth: none
+}
+
+vars:pre-request {
+  anime_id: 1
+}

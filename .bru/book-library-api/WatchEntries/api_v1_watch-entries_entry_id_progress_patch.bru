@@ -1,0 +1,16 @@
+meta {
+  name: Update Progress
+  type: http
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/watch-entries/{{entry_id}}/progress
+}
+
+
+
+body:json {
+{
+  "example": "#/components/schemas/WatchEntryProgressUpdate"
+}
+}

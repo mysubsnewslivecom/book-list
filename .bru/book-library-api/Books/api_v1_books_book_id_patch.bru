@@ -1,0 +1,16 @@
+meta {
+  name: Update book
+  type: http
+}
+
+patch {
+  url: {{baseUrl}}/api/v1/books/{{book_id}}
+}
+
+
+
+body:json {
+{
+  "example": "#/components/schemas/BookUpdate"
+}
+}

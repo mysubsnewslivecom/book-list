@@ -1,0 +1,16 @@
+meta {
+  name: Create book
+  type: http
+}
+
+post {
+  url: {{baseUrl}}/api/v1/books/
+}
+
+
+
+body:json {
+{
+  "example": "#/components/schemas/BookCreate"
+}
+}

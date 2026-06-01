@@ -1,0 +1,16 @@
+meta {
+  name: Update Anime
+  type: http
+}
+
+put {
+  url: {{baseUrl}}/api/v1/anime/{{anime_id}}
+}
+
+
+
+body:json {
+{
+  "example": "#/components/schemas/AnimeUpdate"
+}
+}

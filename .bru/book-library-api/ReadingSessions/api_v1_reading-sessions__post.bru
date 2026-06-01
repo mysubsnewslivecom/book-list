@@ -1,0 +1,16 @@
+meta {
+  name: Create Session
+  type: http
+}
+
+post {
+  url: {{baseUrl}}/api/v1/reading-sessions/
+}
+
+
+
+body:json {
+{
+  "example": "#/components/schemas/ReadingSessionCreate"
+}
+}

@@ -1,0 +1,16 @@
+meta {
+  name: Create Season
+  type: http
+}
+
+post {
+  url: {{baseUrl}}/api/v1/anime/{{anime_id}}/seasons
+}
+
+
+
+body:json {
+{
+  "example": "#/components/schemas/AnimeSeasonCreate"
+}
+}

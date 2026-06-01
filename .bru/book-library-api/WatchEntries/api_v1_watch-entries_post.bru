@@ -1,0 +1,16 @@
+meta {
+  name: Create Watch Entry
+  type: http
+}
+
+post {
+  url: {{baseUrl}}/api/v1/watch-entries
+}
+
+
+
+body:json {
+{
+  "example": "#/components/schemas/WatchEntryCreate"
+}
+}
