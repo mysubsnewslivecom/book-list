@@ -1,5 +1,5 @@
 # ---------- Builder ----------
-FROM python:3.14-slim AS builder
+FROM python:3.14.5-slim-trixie AS builder
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
@@ -23,7 +23,7 @@ RUN uv sync --frozen --no-dev && rm -rvf *.egg-info uv.lock pyproject.toml
 COPY --chown=appuser:appuser . .
 
 # ---------- Runtime ----------
-FROM python:3.14.5-slim
+FROM python:3.14.5-slim-trixie
 
 RUN useradd -m appuser
 

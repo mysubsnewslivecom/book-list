@@ -82,3 +82,13 @@ dotenv run alembic check > /dev/null 2>&1 || (
     && dotenv run alembic upgrade head
 )
 """
+
+[tool.poe.tasks.pbuild]
+shell = """
+podman build . -f Dockerfile -t book-list:local
+"""
+
+[tool.poe.tasks.prun]
+shell = """
+podman run -it --env-file .env --rm -p 8001:8001 --network proxy-nw book-list:local
+"""
