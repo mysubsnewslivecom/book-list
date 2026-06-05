@@ -6,6 +6,7 @@ import os
 import tempfile
 import urllib.request
 from dataclasses import dataclass
+from pathlib import Path
 
 # ----------------------------
 # Logging
@@ -164,6 +165,39 @@ class Bootstrapper:
 
         return (await self.shell.run(cmd)) == 0
 
+    async def opencode_ollama_config(self) -> bool:
+        ollama_config = """{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": {
+        "baseURL": "http://ollama:11434/v1"
+      },
+      "models": {
+        "gemma4-agent:26b": {
+          "name": "gemma4-agent:26b"
+        },
+        "deepseekr1-agent:14b": {
+          "name": "deepseekr1-agent:14b"
+        }
+      }
+    }
+  }
+}
+        """
+        user_config = Path(os.path.expanduser("~")) / ".config/opencode/config.json"
+        logger.info("writing opencode config to %s", user_config)
+        try:
+            with open(file=user_config, mode="w", encoding="utf-8") as f:
+                f.write(ollama_config)
+        except FileNotFoundError:
+            logger.exception("failed to write opencode config file")
+            return False
+
+        return True
+
     def cleanup(self):
         for path in self.temp_files:
             try:
@@ -185,6 +219,10 @@ class Bootstrapper:
 
             if not await self.run_nvm():
                 logger.error("nvm install failed")
+                return
+
+            if not await self.opencode_ollama_config():
+                logger.error("ollama config failed")
                 return
 
             logger.info("bootstrap completed successfully")
