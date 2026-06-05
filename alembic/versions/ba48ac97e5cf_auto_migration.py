@@ -1,8 +1,8 @@
 """auto migration
 
-Revision ID: 62f8c8b8446b
+Revision ID: ba48ac97e5cf
 Revises: 
-Create Date: 2026-06-01 20:52:05.877337
+Create Date: 2026-06-05 17:23:53.357539
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '62f8c8b8446b'
+revision: str = 'ba48ac97e5cf'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -27,7 +27,7 @@ def upgrade() -> None:
     sa.Column('alternative_title', sa.String(length=255), nullable=True),
     sa.Column('studio', sa.String(length=255), nullable=True),
     sa.Column('release_year', sa.Integer(), nullable=True),
-    sa.Column('status', sa.Enum('AIRING', 'COMPLETED', 'UPCOMING', name='animestatus'), nullable=False),
+    sa.Column('status', sa.Enum('airing', 'completed', 'upcoming', name='anime_status_enum', schema='books'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('title'),
@@ -38,7 +38,7 @@ def upgrade() -> None:
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('author', sa.String(), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
-    sa.Column('status', sa.Enum('READ', 'PENDING', 'READING', name='status'), nullable=False),
+    sa.Column('status', sa.Enum('read', 'pending', 'reading', name='books_status_enum', schema='books'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     schema='books'
@@ -74,7 +74,7 @@ def upgrade() -> None:
     op.create_table('watch_entries',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('season_id', sa.Integer(), nullable=False),
-    sa.Column('watch_status', sa.Enum('WATCHING', 'COMPLETED', 'ON_HOLD', 'DROPPED', 'PLAN_TO_WATCH', name='watchstatus'), nullable=False),
+    sa.Column('watch_status', sa.Enum('watching', 'completed', 'on_hold', 'dropped', 'plan_to_watch', name='anime_watch_status_enum', schema='books'), nullable=False),
     sa.Column('current_episode', sa.Integer(), nullable=False),
     sa.Column('rating', sa.Numeric(precision=3, scale=1), nullable=True),
     sa.Column('started_at', sa.Date(), nullable=True),

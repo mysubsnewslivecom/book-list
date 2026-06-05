@@ -7,8 +7,17 @@ from db.database import Base
 from db.models import anime, books  # noqa: F401 - Ensure models are imported for Alembic autogenerate support
 from utils.config import settings
 
+
+def get_database_url() -> str:
+    """
+    Returns the database URL from application settings.
+    """
+    return settings.sqlalchemy_database_uri
+
+
 # Alembic Config object
 config = context.config
+config.set_main_option("sqlalchemy.url", str(get_database_url()))
 
 # Configure logging
 if config.config_file_name is not None:
@@ -16,13 +25,6 @@ if config.config_file_name is not None:
 
 # Metadata for autogenerate support
 target_metadata = Base.metadata
-
-
-def get_database_url() -> str:
-    """
-    Returns the database URL from application settings.
-    """
-    return settings.sqlalchemy_database_uri
 
 
 def run_migrations_offline() -> None:
@@ -43,6 +45,7 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
+        version_table_schema=settings.database_schema,
     )
 
     with context.begin_transaction():

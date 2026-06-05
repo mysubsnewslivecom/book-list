@@ -9,6 +9,7 @@ from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ..database import Base
+from utils.config import settings
 
 
 class AnimeStatus(StrEnum):
@@ -25,42 +26,39 @@ class WatchStatus(StrEnum):
     PLAN_TO_WATCH = "plan_to_watch"
 
 
+anime_status_enum_type = SQLEnum(
+    *[c.value for c in AnimeStatus],
+    name="anime_status_enum",
+    schema=settings.database_schema,
+    create_type=True,
+)
+
+
+anime_watch_status_enum_type = SQLEnum(
+    *[c.value for c in WatchStatus],
+    name="anime_watch_status_enum",
+    schema=settings.database_schema,
+    create_type=True,
+)
+
+
 class Anime(Base):
     __tablename__ = "anime"
-    __table_args__ = {"schema": "books"}
+    __table_args__ = {"schema": settings.database_schema}
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    title: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        unique=True,
-    )
+    title: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
 
-    alternative_title: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True,
-    )
+    alternative_title: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    studio: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True,
-    )
+    studio: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    release_year: Mapped[int | None] = mapped_column(
-        Integer,
-        nullable=True,
-    )
+    release_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    status: Mapped[AnimeStatus] = mapped_column(
-        SQLEnum(AnimeStatus),
-        nullable=False,
-    )
+    status: Mapped[AnimeStatus] = mapped_column(anime_status_enum_type, nullable=False)
 
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default=lambda: datetime.now(UTC),
-    )
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(UTC))
 
     seasons: Mapped[list[AnimeSeason]] = relationship(
         back_populates="anime",
@@ -82,38 +80,22 @@ class AnimeSeason(Base):
             "season_number > 0",
             name="ck_season_number_positive",
         ),
-        {"schema": "books"},
+        {"schema": settings.database_schema},
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    anime_id: Mapped[int] = mapped_column(
-        ForeignKey(
-            "books.anime.id",
-            ondelete="CASCADE",
-        )
-    )
+    anime_id: Mapped[int] = mapped_column(ForeignKey("books.anime.id", ondelete="CASCADE"))
 
     season_number: Mapped[int] = mapped_column(Integer)
 
-    title: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True,
-    )
+    title: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    total_episodes: Mapped[int | None] = mapped_column(
-        Integer,
-        nullable=True,
-    )
+    total_episodes: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
-    anime: Mapped[Anime] = relationship(
-        back_populates="seasons",
-    )
+    anime: Mapped[Anime] = relationship(back_populates="seasons")
 
-    watch_entries: Mapped[list[WatchEntry]] = relationship(
-        back_populates="season",
-        cascade="all, delete-orphan",
-    )
+    watch_entries: Mapped[list[WatchEntry]] = relationship(back_populates="season", cascade="all, delete-orphan")
 
 
 class WatchEntry(Base):
@@ -124,49 +106,25 @@ class WatchEntry(Base):
             "current_episode >= 0",
             name="ck_current_episode_positive",
         ),
-        {"schema": "books"},
+        {"schema": settings.database_schema},
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    season_id: Mapped[int] = mapped_column(
-        ForeignKey(
-            "books.anime_seasons.id",
-            ondelete="CASCADE",
-        )
-    )
+    season_id: Mapped[int] = mapped_column(ForeignKey("books.anime_seasons.id", ondelete="CASCADE"))
 
     watch_status: Mapped[WatchStatus] = mapped_column(
-        SQLEnum(WatchStatus),
-        nullable=False,
-        default=WatchStatus.PLAN_TO_WATCH,
+        anime_watch_status_enum_type, nullable=False, default=WatchStatus.PLAN_TO_WATCH
     )
 
-    current_episode: Mapped[int] = mapped_column(
-        Integer,
-        default=0,
-    )
+    current_episode: Mapped[int] = mapped_column(Integer, default=0)
 
-    rating: Mapped[Decimal | None] = mapped_column(
-        Numeric(3, 1),
-        nullable=True,
-    )
+    rating: Mapped[Decimal | None] = mapped_column(Numeric(3, 1), nullable=True)
 
-    started_at: Mapped[date | None] = mapped_column(
-        Date,
-        nullable=True,
-    )
+    started_at: Mapped[date | None] = mapped_column(Date, nullable=True)
 
-    finished_at: Mapped[date | None] = mapped_column(
-        Date,
-        nullable=True,
-    )
+    finished_at: Mapped[date | None] = mapped_column(Date, nullable=True)
 
-    notes: Mapped[str | None] = mapped_column(
-        Text,
-        nullable=True,
-    )
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    season: Mapped[AnimeSeason] = relationship(
-        back_populates="watch_entries",
-    )
+    season: Mapped[AnimeSeason] = relationship(back_populates="watch_entries")

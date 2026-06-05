@@ -16,6 +16,7 @@ class Settings(CustomSettings):
     is_sqlite: bool = False
     sqlite_path: str = "sqlite:///data/database.db"
     database_url: str | None = None
+    database_schema: str = "books"
 
     @property
     def sqlalchemy_database_uri(self) -> str:
