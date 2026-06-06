@@ -8,8 +8,9 @@ from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, Integer, Num
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from ..database import Base
 from utils.config import settings
+
+from ..database import Base
 
 
 class AnimeStatus(StrEnum):
