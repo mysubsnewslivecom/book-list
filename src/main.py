@@ -16,6 +16,7 @@ from api import (
     watch_entries_router,
 )
 from db.database import Base, engine
+from utils.telemetry import init_telemetry
 
 # Configure logging
 # logging.basicConfig(
@@ -35,6 +36,9 @@ async def lifespan(_app: FastAPI):
     """
 
     logger.info("Starting application...")
+
+    # Initialize telemetry
+    init_telemetry(_app)
 
     # Initialize database
     Base.metadata.create_all(bind=engine)
