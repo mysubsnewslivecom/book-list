@@ -218,3 +218,7 @@ __marimo__/
 .streamlit/secrets.toml
 *.db
 **/vs-ext
+**/.agents
+**/docs/issues
+**/docs/prds
+AGENTS.md

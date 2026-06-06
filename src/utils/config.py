@@ -17,6 +17,9 @@ class Settings(CustomSettings):
     sqlite_path: str = "sqlite:///data/database.db"
     database_url: str | None = None
     database_schema: str = "books"
+    otel_service_name: str = "book-list-service"
+    otel_exporter_otlp_endpoint: str | None = None
+    otel_exporter_otlp_protocol: str = "grpc"
 
     @property
     def sqlalchemy_database_uri(self) -> str:
