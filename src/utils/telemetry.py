@@ -1,14 +1,18 @@
+from fastapi import FastAPI
 from opentelemetry import trace
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter as GRPCOTLPSpanExporter
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter as HTTPOTLPSpanExporter
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 from opentelemetry.sdk.resources import SERVICE_NAME, Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
+from db.database import engine
 from utils.config import settings
 
 
-def init_telemetry() -> None:
+def init_telemetry(app: FastAPI | None = None) -> None:
     resource = Resource.create(attributes={SERVICE_NAME: settings.otel_service_name})
 
     provider = TracerProvider(resource=resource)
@@ -23,3 +27,10 @@ def init_telemetry() -> None:
         provider.add_span_processor(processor)
 
     trace.set_tracer_provider(provider)
+
+    # Instrument SQLAlchemy
+    SQLAlchemyInstrumentor().instrument(engine=engine)
+
+    # Instrument FastAPI app if provided
+    if app is not None:
+        FastAPIInstrumentor.instrument_app(app)

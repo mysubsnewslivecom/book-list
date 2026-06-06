@@ -15,6 +15,7 @@ dependencies = [
     "opentelemetry-instrumentation-fastapi>=0.63b1",
     "opentelemetry-instrumentation-logging>=0.63b1",
     "opentelemetry-instrumentation-psycopg>=0.63b1",
+    "opentelemetry-instrumentation-sqlalchemy>=0.63b1",
     "opentelemetry-instrumentation-urllib>=0.63b1",
     "opentelemetry-sdk>=1.42.1",
     "psycopg[binary]>=3.3.4",
