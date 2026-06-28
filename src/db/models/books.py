@@ -54,7 +54,7 @@ class ReadingSession(Base):
         autoincrement=True,
     )
 
-    book_id: Mapped[int] = mapped_column(ForeignKey("books.books.id"), nullable=False)
+    book_id: Mapped[int] = mapped_column(ForeignKey("data.books.id"), nullable=False)
 
     session_date: Mapped[date] = mapped_column(Date, nullable=False)
 

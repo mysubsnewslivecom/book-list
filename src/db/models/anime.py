@@ -8,9 +8,8 @@ from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, Integer, Num
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from db.database import Base
 from utils.config import settings
-
-from ..database import Base
 
 
 class AnimeStatus(StrEnum):
@@ -86,7 +85,7 @@ class AnimeSeason(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    anime_id: Mapped[int] = mapped_column(ForeignKey("books.anime.id", ondelete="CASCADE"))
+    anime_id: Mapped[int] = mapped_column(ForeignKey("data.anime.id", ondelete="CASCADE"))
 
     season_number: Mapped[int] = mapped_column(Integer)
 
@@ -112,7 +111,7 @@ class WatchEntry(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    season_id: Mapped[int] = mapped_column(ForeignKey("books.anime_seasons.id", ondelete="CASCADE"))
+    season_id: Mapped[int] = mapped_column(ForeignKey("data.anime_seasons.id", ondelete="CASCADE"))
 
     watch_status: Mapped[WatchStatus] = mapped_column(
         anime_watch_status_enum_type, nullable=False, default=WatchStatus.PLAN_TO_WATCH

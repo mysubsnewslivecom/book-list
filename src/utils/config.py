@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -12,11 +13,20 @@ class CustomSettings(BaseSettings):
     )
 
 
+class Openweather(CustomSettings):
+    db_schema: str = "openweather"
+    openweather_api_key: SecretStr
+    forcast_api: str = "https://api.openweathermap.org/data/2.5/forecast"
+    current_weather_url: str = "https://api.openweathermap.org/data/2.5/weather"
+
+
 class Settings(CustomSettings):
+    openweather: Openweather = Openweather()
+
     is_sqlite: bool = False
     sqlite_path: str = "sqlite:///data/database.db"
     database_url: str | None = None
-    database_schema: str = "books"
+    database_schema: str = "data"
     otel_service_name: str = "book-list-service"
     otel_exporter_otlp_endpoint: str | None = None
     otel_exporter_otlp_protocol: str = "grpc"

@@ -1,36 +1,44 @@
+import os
+
 from fastapi import FastAPI
 from opentelemetry import trace
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter as GRPCOTLPSpanExporter
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter as HTTPOTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
-from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
-from opentelemetry.sdk.resources import SERVICE_NAME, Resource
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 
-from db.database import engine
-from utils.config import settings
 
+def init_telemetry(app: FastAPI) -> None:
+    service_name = os.getenv(
+        "OTEL_SERVICE_NAME",
+        "book-library-api",
+    )
 
-def init_telemetry(app: FastAPI | None = None) -> None:
-    resource = Resource.create(attributes={SERVICE_NAME: settings.otel_service_name})
+    resource = Resource.create(
+        {
+            "service.name": service_name,
+            "service.version": "1.0.0",
+        }
+    )
 
-    provider = TracerProvider(resource=resource)
+    provider = TracerProvider(
+        resource=resource,
+    )
 
-    if settings.otel_exporter_otlp_endpoint:
-        if settings.otel_exporter_otlp_protocol == "grpc":
-            exporter = GRPCOTLPSpanExporter(endpoint=settings.otel_exporter_otlp_endpoint, insecure=True)
-        else:
-            exporter = HTTPOTLPSpanExporter(endpoint=settings.otel_exporter_otlp_endpoint)
+    exporter = OTLPSpanExporter(
+        endpoint=os.getenv(
+            "OTEL_EXPORTER_OTLP_ENDPOINT",
+            "http://tempo:4317",
+        ),
+        insecure=True,
+    )
 
-        processor = BatchSpanProcessor(exporter)
-        provider.add_span_processor(processor)
+    provider.add_span_processor(BatchSpanProcessor(exporter))
 
     trace.set_tracer_provider(provider)
 
-    # Instrument SQLAlchemy
-    SQLAlchemyInstrumentor().instrument(engine=engine)
+    FastAPIInstrumentor.instrument_app(app)
 
-    # Instrument FastAPI app if provided
-    if app is not None:
-        FastAPIInstrumentor.instrument_app(app)
+    HTTPXClientInstrumentor().instrument()

@@ -13,6 +13,7 @@ dependencies = [
     "opentelemetry-instrumentation-asyncio>=0.63b1",
     "opentelemetry-instrumentation-asyncpg>=0.63b1",
     "opentelemetry-instrumentation-fastapi>=0.63b1",
+    "opentelemetry-instrumentation-httpx>=0.63b1",
     "opentelemetry-instrumentation-logging>=0.63b1",
     "opentelemetry-instrumentation-psycopg>=0.63b1",
     "opentelemetry-instrumentation-sqlalchemy>=0.63b1",

@@ -11,6 +11,7 @@ from api import (
     anime_router,
     books_router,
     dashboard_router,
+    openweather_forecast_router,
     reading_session_router,
     seasons_router,
     watch_entries_router,
@@ -65,6 +66,7 @@ app.include_router(anime_router, prefix="/api/v1")
 app.include_router(dashboard_router, prefix="/api/v1")
 app.include_router(seasons_router, prefix="/api/v1")
 app.include_router(watch_entries_router, prefix="/api/v1")
+app.include_router(openweather_forecast_router, prefix="/api/v1")
 
 # Serve static files
 static_dir = Path(__file__).parent / "static"

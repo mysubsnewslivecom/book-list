@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 
 from repositories.anime import WatchEntryRepository
@@ -31,7 +32,12 @@ class WatchEntryService:
             "plan_to_watch": 0,
         }
         rows = self.repo.dashboard_stats()
+        logging.info(rows)
         for status, count in rows:
+            logging.info(f"Status: {status}, Count: {count}")
+            if isinstance(status, str):
+                stats[status] = count
+                continue
             stats[status.value] = count
 
         return stats

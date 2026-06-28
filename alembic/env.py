@@ -4,7 +4,11 @@ from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from db.database import Base
-from db.models import anime, books  # noqa: F401 - Ensure models are imported for Alembic autogenerate support
+from db.models import (  # noqa: F401 - Ensure models are imported for Alembic autogenerate support
+    anime,
+    books,
+    openweather,
+)
 from utils.config import settings
 
 
