@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from api.deps import CurrentWeatherServiceDep, ForecastServiceDep
-from schemas.anime.openweather import CurrentWeatherResponse
+from schemas.openweather import CurrentWeatherResponse
 
 router = APIRouter(prefix="/openweather", tags=["openweather"])
 
