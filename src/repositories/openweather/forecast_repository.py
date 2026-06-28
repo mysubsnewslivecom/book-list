@@ -348,7 +348,7 @@ class ForecastRepository:
                             "city input should in 'city,country_code' format",
                         )
                     )
-                    raise
+                    raise OpenWeatherError("city input should be in 'city,country_code' format")
 
                 payload = await self.get(city)
                 span.set_attribute("payload", json.dumps(payload))

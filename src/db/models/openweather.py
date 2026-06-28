@@ -1,17 +1,6 @@
 """SQLAlchemy ORM models for weather forecast data."""
 
-from sqlalchemy import (
-    BigInteger,
-    Column,
-    Date,
-    DateTime,
-    Float,
-    ForeignKey,
-    Integer,
-    String,
-    UniqueConstraint,
-    Index
-)
+from sqlalchemy import BigInteger, Column, Date, DateTime, Float, ForeignKey, Index, Integer, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 

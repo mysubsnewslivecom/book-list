@@ -2,10 +2,13 @@ import logging
 from collections import defaultdict
 
 from fastapi import APIRouter, HTTPException, Query, status
+from opentelemetry import trace
 from pydantic import BaseModel
 
 from api.deps import BookServiceDep
 from schemas.books import BookCreate, BookOut, BookUpdate
+
+tracer = trace.get_tracer(__name__)
 
 # ---------------------------------------------------------------------
 # Logging
@@ -54,9 +57,11 @@ async def get_books(
         description="Filter books by status (e.g. reading, finished, planned)",
     ),
 ):
-    if book_status:
-        return service.get_book_by_status(book_status)
-    return service.list_books()
+    with tracer.start_as_current_span("api.books.list") as span:
+        if book_status:
+            span.set_attribute("book.status", book_status)
+            return service.get_book_by_status(book_status)
+        return service.list_books()
 
 
 @router.get(
@@ -73,7 +78,9 @@ async def get_book(
     book_id: int,
     service: BookServiceDep,
 ):
-    book = service.get_book(book_id)
+    with tracer.start_as_current_span("api.books.get") as span:
+        span.set_attribute("book.id", book_id)
+        book = service.get_book(book_id)
 
     if not book:
         raise HTTPException(
@@ -96,7 +103,9 @@ async def create_book(
     payload: BookCreate,
     service: BookServiceDep,
 ):
-    return service.create_book(payload)
+    with tracer.start_as_current_span("api.books.create") as span:
+        span.set_attribute("book.title", payload.title)
+        return service.create_book(payload)
 
 
 @router.patch(
@@ -114,7 +123,9 @@ async def update_book(
     payload: BookUpdate,
     service: BookServiceDep,
 ):
-    book = service.update_book(book_id, payload)
+    with tracer.start_as_current_span("api.books.update") as span:
+        span.set_attribute("book.id", book_id)
+        book = service.update_book(book_id, payload)
 
     if not book:
         raise HTTPException(
@@ -139,7 +150,9 @@ async def delete_book(
     book_id: int,
     service: BookServiceDep,
 ):
-    deleted = service.delete_book(book_id)
+    with tracer.start_as_current_span("api.books.delete") as span:
+        span.set_attribute("book.id", book_id)
+        deleted = service.delete_book(book_id)
 
     if not deleted:
         raise HTTPException(
@@ -171,7 +184,8 @@ class ByStatus(BaseModel):
     operation_id="getBooksByStatus",
 )
 async def get_books_by_status(service: BookServiceDep):
-    books = service.list_books()
+    with tracer.start_as_current_span("api.books.by_status"):
+        books = service.list_books()
 
     if not books:
         raise HTTPException(
