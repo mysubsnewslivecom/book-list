@@ -41,10 +41,6 @@ SELECT
 
     ca.sunrise,
     ca.sunset
-        ROW_NUMBER() OVER (
-            PARTITION BY c.id
-            ORDER BY f.dt_txt
-        ) AS rn
 FROM openweather.forecasts f
 JOIN openweather.cities c
     ON c.id = f.city_id

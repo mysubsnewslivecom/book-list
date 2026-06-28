@@ -1,8 +1,8 @@
-"""auto migration
+"""auto migration~
 
-Revision ID: 028c77482e92
-Revises: 7dca8ce6f1cc
-Create Date: 2026-06-28 12:37:57.806386
+Revision ID: d4da9de2f0a9
+Revises: 
+Create Date: 2026-06-28 22:18:26.860917
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = '028c77482e92'
-down_revision: Union[str, Sequence[str], None] = '7dca8ce6f1cc'
+revision: str = 'd4da9de2f0a9'
+down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -27,27 +27,27 @@ def upgrade() -> None:
     sa.Column('alternative_title', sa.String(length=255), nullable=True),
     sa.Column('studio', sa.String(length=255), nullable=True),
     sa.Column('release_year', sa.Integer(), nullable=True),
-    sa.Column('status', sa.Enum('airing', 'completed', 'upcoming', name='anime_status_enum', schema='data'), nullable=False),
+    sa.Column('status', sa.Enum('airing', 'completed', 'upcoming', name='anime_status_enum', schema='anime'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('title'),
-    schema='data'
+    schema='anime'
     )
     op.create_table('books',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
     sa.Column('author', sa.String(), nullable=False),
     sa.Column('description', sa.String(), nullable=True),
-    sa.Column('status', sa.Enum('read', 'pending', 'reading', name='books_status_enum', schema='data'), nullable=False),
+    sa.Column('status', sa.Enum('read', 'pending', 'reading', name='books_status_enum', schema='books'), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=False),
     sa.PrimaryKeyConstraint('id'),
-    schema='data'
+    schema='books'
     )
-    op.create_index(op.f('ix_data_books_author'), 'books', ['author'], unique=False, schema='data')
-    op.create_index(op.f('ix_data_books_created_at'), 'books', ['created_at'], unique=False, schema='data')
-    op.create_index(op.f('ix_data_books_id'), 'books', ['id'], unique=False, schema='data')
-    op.create_index(op.f('ix_data_books_status'), 'books', ['status'], unique=False, schema='data')
-    op.create_index(op.f('ix_data_books_title'), 'books', ['title'], unique=True, schema='data')
+    op.create_index(op.f('ix_books_books_author'), 'books', ['author'], unique=False, schema='books')
+    op.create_index(op.f('ix_books_books_created_at'), 'books', ['created_at'], unique=False, schema='books')
+    op.create_index(op.f('ix_books_books_id'), 'books', ['id'], unique=False, schema='books')
+    op.create_index(op.f('ix_books_books_status'), 'books', ['status'], unique=False, schema='books')
+    op.create_index(op.f('ix_books_books_title'), 'books', ['title'], unique=True, schema='books')
     op.create_table('cities',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=100), nullable=False),
@@ -82,10 +82,10 @@ def upgrade() -> None:
     sa.Column('title', sa.String(length=255), nullable=True),
     sa.Column('total_episodes', sa.Integer(), nullable=True),
     sa.CheckConstraint('season_number > 0', name='ck_season_number_positive'),
-    sa.ForeignKeyConstraint(['anime_id'], ['data.anime.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['anime_id'], ['anime.anime.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('anime_id', 'season_number', name='uq_anime_season'),
-    schema='data'
+    schema='anime'
     )
     op.create_table('reading_sessions',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -94,9 +94,9 @@ def upgrade() -> None:
     sa.Column('minutes_read', sa.Integer(), nullable=False),
     sa.Column('pages_read', sa.Integer(), nullable=True),
     sa.Column('notes', sa.Text(), nullable=True),
-    sa.ForeignKeyConstraint(['book_id'], ['data.books.id'], ),
+    sa.ForeignKeyConstraint(['book_id'], ['books.books.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    schema='data'
+    schema='books'
     )
     op.create_table('city_astronomy',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
@@ -124,16 +124,16 @@ def upgrade() -> None:
     op.create_table('watch_entries',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('season_id', sa.Integer(), nullable=False),
-    sa.Column('watch_status', sa.Enum('watching', 'completed', 'on_hold', 'dropped', 'plan_to_watch', name='anime_watch_status_enum', schema='data'), nullable=False),
+    sa.Column('watch_status', sa.Enum('watching', 'completed', 'on_hold', 'dropped', 'plan_to_watch', name='anime_watch_status_enum', schema='anime'), nullable=False),
     sa.Column('current_episode', sa.Integer(), nullable=False),
     sa.Column('rating', sa.Numeric(precision=3, scale=1), nullable=True),
     sa.Column('started_at', sa.Date(), nullable=True),
     sa.Column('finished_at', sa.Date(), nullable=True),
     sa.Column('notes', sa.Text(), nullable=True),
     sa.CheckConstraint('current_episode >= 0', name='ck_current_episode_positive'),
-    sa.ForeignKeyConstraint(['season_id'], ['data.anime_seasons.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['season_id'], ['anime.anime_seasons.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
-    schema='data'
+    schema='anime'
     )
     op.create_table('forecast_clouds',
     sa.Column('forecast_id', sa.Integer(), nullable=False),
@@ -204,19 +204,19 @@ def downgrade() -> None:
     op.drop_table('forecast_rain', schema='openweather')
     op.drop_table('forecast_main', schema='openweather')
     op.drop_table('forecast_clouds', schema='openweather')
-    op.drop_table('watch_entries', schema='data')
+    op.drop_table('watch_entries', schema='anime')
     op.drop_table('forecasts', schema='openweather')
     op.drop_table('city_astronomy', schema='openweather')
-    op.drop_table('reading_sessions', schema='data')
-    op.drop_table('anime_seasons', schema='data')
+    op.drop_table('reading_sessions', schema='books')
+    op.drop_table('anime_seasons', schema='anime')
     op.drop_index('ix_current_weather_json_dt', table_name='current_weather_json', schema='openweather')
     op.drop_table('current_weather_json', schema='openweather')
     op.drop_table('cities', schema='openweather')
-    op.drop_index(op.f('ix_data_books_title'), table_name='books', schema='data')
-    op.drop_index(op.f('ix_data_books_status'), table_name='books', schema='data')
-    op.drop_index(op.f('ix_data_books_id'), table_name='books', schema='data')
-    op.drop_index(op.f('ix_data_books_created_at'), table_name='books', schema='data')
-    op.drop_index(op.f('ix_data_books_author'), table_name='books', schema='data')
-    op.drop_table('books', schema='data')
-    op.drop_table('anime', schema='data')
+    op.drop_index(op.f('ix_books_books_title'), table_name='books', schema='books')
+    op.drop_index(op.f('ix_books_books_status'), table_name='books', schema='books')
+    op.drop_index(op.f('ix_books_books_id'), table_name='books', schema='books')
+    op.drop_index(op.f('ix_books_books_created_at'), table_name='books', schema='books')
+    op.drop_index(op.f('ix_books_books_author'), table_name='books', schema='books')
+    op.drop_table('books', schema='books')
+    op.drop_table('anime', schema='anime')
     # ### end Alembic commands ###

@@ -1,15 +1,11 @@
-from logging.config import fileConfig
+from logging.config import fileConfig  # noqa: I001
 
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from db.database import Base
-from db.models import (  # noqa: F401 - Ensure models are imported for Alembic autogenerate support
-    anime,
-    books,
-    openweather,
-)
 from utils.config import settings
+from db.models import books, anime, openweather  # noqa: F401
 
 
 def get_database_url() -> str:
@@ -49,7 +45,7 @@ def run_migrations_offline() -> None:
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
         compare_type=True,
-        version_table_schema=settings.database_schema,
+        version_table_schema="public",
     )
 
     with context.begin_transaction():

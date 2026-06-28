@@ -30,7 +30,7 @@ anime_status_enum_type = SQLEnum(
     *[c.value for c in AnimeStatus],
     name="anime_status_enum",
     schema=settings.anime.db_schema,
-    create_type=True,
+    # create_type=True,
 )
 
 
@@ -38,7 +38,7 @@ anime_watch_status_enum_type = SQLEnum(
     *[c.value for c in WatchStatus],
     name="anime_watch_status_enum",
     schema=settings.anime.db_schema,
-    create_type=True,
+    # create_type=True,
 )
 
 
