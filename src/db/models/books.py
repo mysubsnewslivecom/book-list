@@ -17,14 +17,14 @@ class Status(enum.StrEnum):
 books_enum_type = Enum(
     *[c.value for c in Status],
     name="books_status_enum",
-    schema=settings.database_schema,
+    schema=settings.books.db_schema,
     create_type=True,
 )
 
 
 class Book(Base):
     __tablename__ = "books"
-    __table_args__ = {"schema": settings.database_schema}
+    __table_args__ = {"schema": settings.books.db_schema}
 
     id = Column(Integer, primary_key=True, index=True)
 
@@ -46,7 +46,7 @@ class Book(Base):
 
 class ReadingSession(Base):
     __tablename__ = "reading_sessions"
-    __table_args__ = {"schema": settings.database_schema}
+    __table_args__ = {"schema": settings.books.db_schema}
 
     id: Mapped[int] = mapped_column(
         Integer,
@@ -54,7 +54,7 @@ class ReadingSession(Base):
         autoincrement=True,
     )
 
-    book_id: Mapped[int] = mapped_column(ForeignKey("data.books.id"), nullable=False)
+    book_id: Mapped[int] = mapped_column(ForeignKey(f"{settings.books.db_schema}.books.id"), nullable=False)
 
     session_date: Mapped[date] = mapped_column(Date, nullable=False)
 

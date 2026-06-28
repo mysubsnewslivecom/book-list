@@ -238,7 +238,7 @@ class ForecastRepository:
             try:
                 async with AsyncClient(timeout=10.0) as client:
                     response = await client.get(
-                        settings.openweather.forcast_api,
+                        settings.openweather.forecast_api,
                         params=params,
                     )
 

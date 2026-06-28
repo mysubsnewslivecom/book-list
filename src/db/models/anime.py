@@ -29,7 +29,7 @@ class WatchStatus(StrEnum):
 anime_status_enum_type = SQLEnum(
     *[c.value for c in AnimeStatus],
     name="anime_status_enum",
-    schema=settings.database_schema,
+    schema=settings.anime.db_schema,
     create_type=True,
 )
 
@@ -37,14 +37,14 @@ anime_status_enum_type = SQLEnum(
 anime_watch_status_enum_type = SQLEnum(
     *[c.value for c in WatchStatus],
     name="anime_watch_status_enum",
-    schema=settings.database_schema,
+    schema=settings.anime.db_schema,
     create_type=True,
 )
 
 
 class Anime(Base):
     __tablename__ = "anime"
-    __table_args__ = {"schema": settings.database_schema}
+    __table_args__ = {"schema": settings.anime.db_schema}
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
@@ -80,12 +80,12 @@ class AnimeSeason(Base):
             "season_number > 0",
             name="ck_season_number_positive",
         ),
-        {"schema": settings.database_schema},
+        {"schema": settings.anime.db_schema},
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    anime_id: Mapped[int] = mapped_column(ForeignKey("data.anime.id", ondelete="CASCADE"))
+    anime_id: Mapped[int] = mapped_column(ForeignKey(f"{settings.anime.db_schema}.anime.id", ondelete="CASCADE"))
 
     season_number: Mapped[int] = mapped_column(Integer)
 
@@ -106,12 +106,14 @@ class WatchEntry(Base):
             "current_episode >= 0",
             name="ck_current_episode_positive",
         ),
-        {"schema": settings.database_schema},
+        {"schema": settings.anime.db_schema},
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    season_id: Mapped[int] = mapped_column(ForeignKey("data.anime_seasons.id", ondelete="CASCADE"))
+    season_id: Mapped[int] = mapped_column(
+        ForeignKey(f"{settings.anime.db_schema}.anime_seasons.id", ondelete="CASCADE")
+    )
 
     watch_status: Mapped[WatchStatus] = mapped_column(
         anime_watch_status_enum_type, nullable=False, default=WatchStatus.PLAN_TO_WATCH

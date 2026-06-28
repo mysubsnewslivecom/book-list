@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import SecretStr
+from pydantic import HttpUrl, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -16,12 +16,31 @@ class CustomSettings(BaseSettings):
 class Openweather(CustomSettings):
     db_schema: str = "openweather"
     openweather_api_key: SecretStr
-    forcast_api: str = "https://api.openweathermap.org/data/2.5/forecast"
-    current_weather_url: str = "https://api.openweathermap.org/data/2.5/weather"
+    base_url: HttpUrl = "https://api.openweathermap.org/data/2.5"
+    # forcast_api: str = "https://api.openweathermap.org/data/2.5/forecast"
+    # current_weather_url: str = "https://api.openweathermap.org/data/2.5/weather"
+
+    @property
+    def current_weather_url(self) -> HttpUrl:
+        return f"{self.base_url}/weather"
+
+    @property
+    def forecast_api(self) -> HttpUrl:
+        return f"{self.base_url}/forecast"
+
+
+class BooksSettings(CustomSettings):
+    db_schema: str = "books"
+
+
+class AnimeSettings(CustomSettings):
+    db_schema: str = "anime"
 
 
 class Settings(CustomSettings):
     openweather: Openweather = Openweather()
+    books: BooksSettings = BooksSettings()
+    anime: AnimeSettings = AnimeSettings()
 
     is_sqlite: bool = False
     sqlite_path: str = "sqlite:///data/database.db"
