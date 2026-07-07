@@ -24,7 +24,7 @@ def get_watch_entries(service: WatchEntryServiceDep):
 @router.post("", response_model=WatchEntryResponse, status_code=201)
 def create_watch_entry(payload: WatchEntryCreate, service: WatchEntryServiceDep):
     with tracer.start_as_current_span("api.anime.watch_entries.create") as span:
-        span.set_attribute("entry.title", payload.title)
+        span.set_attribute("entry", payload.model_dump())
         return service.create(payload.model_dump())
 
 
