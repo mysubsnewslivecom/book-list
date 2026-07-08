@@ -1,4 +1,3 @@
-import logging
 from typing import Any
 
 from opentelemetry import trace
@@ -49,9 +48,9 @@ class WatchEntryService:
             }
 
             rows = self.repo.dashboard_stats()
-            logging.info(rows)
+            # logging.info(rows)
             for status, count in rows:
-                logging.info("Status: %s, Count: %s", status, count)
+                # logging.info("Status: %s, Count: %s", status, count)
                 if isinstance(status, str):
                     stats[status] = count
                     continue
