@@ -13,3 +13,8 @@ class ForecastService:
         with tracer.start_as_current_span("forecast_service.save") as span:
             span.set_attribute("weather.city", city)
             return self.repo.run(city)
+
+    def get(self, city: str):
+        with tracer.start_as_current_span("forecast_service.get") as span:
+            span.set_attribute("weather.city", city)
+            return self.repo.get(city)

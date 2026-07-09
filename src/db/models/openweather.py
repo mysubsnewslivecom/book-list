@@ -5,6 +5,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
 from db.database import Base
+from db.models.base_model import BaseModel
 from utils.config import settings
 
 
@@ -243,6 +244,30 @@ class CurrentWeatherJSON(Base):
     city_id = Column(Integer, nullable=False)
     city_name = Column(String(100))
     country = Column(String(10))
+
+    lat = Column(Float)
+    lon = Column(Float)
+
+    dt = Column(BigInteger, nullable=False)
+    timezone = Column(Integer)
+    cod = Column(Integer)
+
+    # FULL RAW PAYLOAD
+    payload = Column(JSONB, nullable=False)
+
+
+class ForecastJSON(BaseModel):
+    __tablename__ = "forecast_weather_json"
+    __table_args__ = (
+        UniqueConstraint("city_id", name="uq_forecast_weather_json_city"),
+        Index("ix_forecast_weather_json_dt", "dt"),
+        {"schema": settings.openweather.db_schema},
+    )
+
+    # normalized fields for fast filtering
+    city_id = Column(Integer, nullable=False)
+    city_name = Column(String(100), nullable=False)
+    country = Column(String(10), nullable=False)
 
     lat = Column(Float)
     lon = Column(Float)

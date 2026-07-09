@@ -26,13 +26,22 @@ class CurrentWeatherRepository:
     - Persisting JSON payloads
     """
 
-    CACHE_HOURS = 1
+    CACHE_HOURS = 4
 
     def __init__(self, db: Session):
         self.db = db
 
+    @staticmethod
+    def _normalize_city_name(city_name: str) -> str:
+        """Strip country code suffix so 'Krakow,PL' and 'Krakow' both match the stored bare name."""
+        return city_name.split(",")[0].strip()
+
     def get(self, city_name: str) -> CurrentWeatherJSON | None:
-        return self.db.query(CurrentWeatherJSON).filter(CurrentWeatherJSON.city_name == city_name).one_or_none()
+        name = self._normalize_city_name(city_name)
+        return self.db.query(CurrentWeatherJSON).filter(CurrentWeatherJSON.city_name == name).one_or_none()
+
+    def get_by_city_id(self, city_id: int) -> CurrentWeatherJSON | None:
+        return self.db.query(CurrentWeatherJSON).filter(CurrentWeatherJSON.city_id == city_id).one_or_none()
 
     def _is_stale(self, record: CurrentWeatherJSON | None) -> bool:
         if record is None:
@@ -44,14 +53,15 @@ class CurrentWeatherRepository:
     def should_fetch(self, city_name: int) -> bool:
         return self._is_stale(self.get(city_name))
 
-    def save(self, payload: dict[str, Any]) -> CurrentWeatherJSON:
-        city_name = payload["name"]
-
-        obj = self.get(city_name)
+    def save(self, city_name: str, payload: dict[str, Any]) -> CurrentWeatherJSON:
+        # Look up by city_id first (the unique constraint key) to avoid
+        # IntegrityError when the same city is queried under a different name string.
+        city_id = payload["id"]
+        obj = self.get_by_city_id(city_id) or self.get(city_name)
 
         if obj is None:
-            logger.debug("Creating weather record city_name=%s", city_name)
-            obj = CurrentWeatherJSON(city_id=payload["id"])
+            logger.debug("Creating weather record city_name=%s city_id=%s", city_name, city_id)
+            obj = CurrentWeatherJSON(city_id=city_id)
             self.db.add(obj)
         else:
             logger.debug("Updating weather record city_name=%s", city_name)
@@ -75,8 +85,8 @@ class CurrentWeatherRepository:
         self.db.refresh(obj)
 
         logger.info(
-            "Saved current weather city=%s city_name=%s timestamp=%s",
-            obj.city_name,
+            "Saved current weather city_id=%s city_name=%s timestamp=%s",
+            obj.city_id,
             obj.city_name,
             obj.dt,
         )
@@ -207,4 +217,4 @@ class CurrentWeatherRepository:
             payload = await self._fetch_from_api(city_name)
 
             logger.info("Current weather cache miss payload=%s", payload)
-            return self.save(payload)
+            return self.save(city_name, payload)

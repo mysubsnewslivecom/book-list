@@ -2,7 +2,7 @@
 
 import json
 import logging
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from httpx import AsyncClient, HTTPStatusError, QueryParams, RequestError
@@ -47,8 +47,31 @@ class OpenWeatherError(Exception):
 class ForecastRepository:
     """Repository for persisting OpenWeatherMap forecast data."""
 
+    CACHE_HOURS = 3
+
     def __init__(self, db: Session):
         self.db = db
+
+    def _latest_forecast_dt(self, city: str) -> int | None:
+        """Return the most recent forecast dt for a city query string ('City,CC'), or None."""
+        parts = city.split(",", 1)
+        country_code = parts[1].strip().upper() if len(parts) == 2 else None
+
+        query = self.db.query(Forecast.dt).join(City, City.id == Forecast.city_id)
+
+        if country_code:
+            query = query.filter(City.country == country_code)
+
+        row = query.order_by(Forecast.dt.desc()).first()
+        return row.dt if row else None
+
+    def _is_stale(self, city: str) -> bool:
+        """Return True when the newest cached forecast is older than CACHE_HOURS."""
+        latest_dt = self._latest_forecast_dt(city)
+        if latest_dt is None:
+            return True
+        last_update = datetime.fromtimestamp(latest_dt, tz=UTC)
+        return datetime.now(UTC) - last_update > timedelta(hours=self.CACHE_HOURS)
 
     def _get_or_create_city(self, city_data: dict[str, Any]) -> City:
         """Retrieve an existing city or create a new one."""
@@ -56,9 +79,16 @@ class ForecastRepository:
         if city:
             return city
 
+        city_name = city_data.get("name", "").strip()
+        if not city_name:
+            raise OpenWeatherError(
+                f"OpenWeather returned an empty city name for city_id={city_data.get('id')!r}. "
+                "Cannot persist a city without a name."
+            )
+
         city = City(
             id=city_data["id"],
-            name=city_data["name"],
+            name=city_name,
             lat=city_data["coord"]["lat"],
             lon=city_data["coord"]["lon"],
             country=city_data["country"],
@@ -349,6 +379,14 @@ class ForecastRepository:
                         )
                     )
                     raise OpenWeatherError("city input should be in 'city,country_code' format")
+
+                if not self._is_stale(city):
+                    logger.info("Forecast cache hit for city=%s, skipping API call", city)
+                    span.set_attribute("forecast.cache_hit", True)
+                    return 0
+
+                logger.info("Forecast cache miss for city=%s, fetching from API", city)
+                span.set_attribute("forecast.cache_hit", False)
 
                 payload = await self.get(city)
                 span.set_attribute("payload", json.dumps(payload))

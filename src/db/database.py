@@ -1,6 +1,6 @@
 from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 from utils.config import settings
 
@@ -24,7 +24,10 @@ session_local = sessionmaker(
     bind=engine,
 )
 
-Base = declarative_base()
+
+# Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
 
 def get_db():
