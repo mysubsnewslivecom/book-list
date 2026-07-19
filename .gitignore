@@ -222,3 +222,6 @@ __marimo__/
 **/docs/issues
 **/docs/prds
 AGENTS.md
+*.parquet
+jikan
+
